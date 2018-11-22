@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script>
+      const lang = navigator.language;
+      document.write(`<title>${lang === 'de-DE' ? 'Neuer' : 'New'} Tab</title>`)
+    </script>
+    <script src="./index.mjs" type="module"></script>
+    <script src="https://unpkg.com/focus-visible" async></script>
+    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="./modules/button/button.css">
+  </head>
+
+  <body>
+    <header>
+      <h1>Hi, <span contenteditable id="name">Name</span>!</h1>
+      <img src="./images/hello.png" alt="Smiley" class="hello-smiley">
+    </header>
+
+    <main>
+      <section id="sites"></section>
+    </main>
+
+    <script>
+      if (location.hostname !== 'localhost' && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(error => {
+          console.error(error)
+        })
+      }
+    </script>
+  </body>
+
+</html>
