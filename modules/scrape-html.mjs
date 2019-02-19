@@ -1,41 +1,82 @@
-const htmlRegex = {
-  title: /<title.*>(.*)<\/title>/i,
-  ogSiteName: /<meta property="og:site_name" content="?'?([^"']*)"?'?.*>/i,
-  color: /<meta name="?'?theme-color"?'? content="?'?([^"']*)"?'?.*>/i,
-  icon: /<link rel="?'?icon"?'?[^>]*href="?'?([^"']*)"?'?/i
-}
+import cheerio from "./cheerio.mjs"
+import { fetchData, join, isAbsoluteURL } from "./utils.mjs"
 
-const mockResponse = () => ({ json() { return Promise.reject() } })
-const mockJson = () => ({ contents: '' })
+const getLargest = array => array.reduce((current, compare) => {
+  const currentSize = parseInt(current.sizes)
+  const compareSize = parseInt(compare.sizes)
+  return (!currentSize || compareSize > currentSize) ? compare : current
+})
 
-const getCorsURL = url => {
-  return `https://allorigins.me/get?url=${encodeURIComponent(url)}`
-}
-
-const getMatch = match => match ? match[1] : null
-const normalize = (base, path) => /^\//.test(path) ? base + path : /^\.\//.test(path) ? url + path.slice(1) : path
-
-const getMetaInfo = async url => {
-  const storedData = localStorage.getItem(url)
-  if (storedData) return JSON.parse(storedData)
-
-  const response = await fetch(getCorsURL(url)).catch(mockResponse)
-  const { contents: html } = await response.json().catch(mockJson)
-
-  const title = getMatch(htmlRegex.title.exec(html))
-  const ogSiteName = getMatch(htmlRegex.ogSiteName.exec(html))
-  const color = getMatch(htmlRegex.color.exec(html))
-  const icon = getMatch(htmlRegex.icon.exec(html))
-
-  const name = ogSiteName || title || null
-
-  const data = {
-    name: name || url,
-    color,
-    icon: normalize(url, icon) || url + '/favicon.ico'
+const getTitle = ($, manifest = {}, url) => {
+  const { name, short_name } = manifest
+  if (name || short_name) {
+    if (name && name.length < 21) return name
+    return short_name || name
   }
-  localStorage.setItem(url, JSON.stringify(data))
-  return data
+
+  return (
+    $('meta[property="og:site_name"]').attr('content') ||
+    $('meta[name="apple-mobile-web-app-title"]').attr('content') ||
+    $('title').text() ||
+    url
+  )
+}
+const getColor = ($, manifest = {}) => {
+  const { theme_color, background_color } = manifest
+  if (theme_color || background_color) return theme_color || background_color
+
+  return $('meta[name="theme-color"]').attr('content')
+}
+const getIcon = ($, manifest = {}, url) => {
+  const { icons, _root } = manifest
+  if (icons && icons.length) {
+    const path = getLargest(icons).src
+    if (_root) return join(_root.replace(/[^\/]*$/, ''), path)
+    return path
+  }
+
+  const iconList = $('link[rel*="icon"]')
+    .map((_, el) => ({ src: $(el).attr('href'), sizes: $(el).attr('sizes') }))
+    .get()
+    .filter(icon => Boolean(icon.src))
+
+  if (iconList.length) {
+    const largest = getLargest(iconList)
+    if (largest.sizes) return largest.src
+    return $('meta[property="og:image"]').attr("content") || largest.src
+  }
+  return 'favicon.ico'
 }
 
-export { getMetaInfo }
+const scrapeHTML = async url => {
+  const storedData = JSON.parse(localStorage.getItem(url))
+  if (storedData) return storedData
+
+  try {
+    const html = await fetchData(url)
+    const $ = cheerio.load(html)
+
+    let manifest
+    const manifestPath = $('link[rel=manifest]').attr('href')
+
+    if (manifestPath) {
+      const response = await fetchData(join(url, manifestPath))
+      if (response) manifest = JSON.parse(response)
+      if (isAbsoluteURL(manifestPath)) manifest._root = manifestPath
+    }
+
+    const iconPath = getIcon($, manifest, url)
+    const name = getTitle($, manifest, url)
+    const color = getColor($, manifest, url)
+    const icon = join(url, iconPath)
+
+    const data = { name, color, icon }
+    localStorage.setItem(url, JSON.stringify(data))
+
+    return data
+  } catch (_) {
+    return { name: url, icon: join(url, 'favicon.ico') }
+  }
+}
+
+export default scrapeHTML

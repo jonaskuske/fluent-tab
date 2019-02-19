@@ -1,4 +1,6 @@
 # Fluent New Tab  
-A New Tab styled following Microsoft's Fluent Design  
+A New Tab page designed following Microsoft's Fluent Design, with Reveal Effects and more.  
   
-[More coming]  
+## Configuration
+
+For configuration, edit the inline script in `index.html`. This is (hopefully) just a temporary solution. :)

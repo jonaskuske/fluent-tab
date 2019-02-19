@@ -1,17 +1,17 @@
-const CACHE_NAME = 'fluent-tab-v4'
+const CACHE_NAME = 'fluent-tab-v5'
 
 const staticAssets = [
   '.',
   './index.html',
   './index.css',
   './index.mjs',
+  './modules/cheerio.mjs',
   './modules/edit-name.mjs',
-  './modules/helpers.mjs',
+  './modules/fluent-button.mjs',
   './modules/scrape-html.mjs',
-  './modules/button/button.mjs',
-  './modules/button/button.css',
-  './images/hello.png',
-  './images/bg.jpg',
+  './modules/utils.mjs',
+  './images/smiley.png',
+  './images/background.jpg',
 ]
 
 // get the filenames to cache from the parcel-manifest and add them to cache

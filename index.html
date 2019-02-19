@@ -5,20 +5,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fluent Tab</title>
+
+    <!-- Configuration: Change your prefered background image and the sites to display -->
     <script>
-      const lang = navigator.language;
-      document.write(`<title>${lang === 'de-DE' ? 'Neuer' : 'New'} Tab</title>`)
+      window.BACKGROUND_IMAGE = "./images/background.jpg"
+      window.SITES = [
+        'https://facebook.com',
+        'https://github.com',
+        'https://mobile.twitter.com',
+        'https://youtube.com',
+        'https://theverge.com',
+        'https://dev.to',
+        'https://medium.com',
+        'https://thenounproject.com'
+      ]
     </script>
+    <!-- End Configuration -->
+
+    <link rel="icon" type="image/png" sizes="32x32"
+      href="./images/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16"
+      href="./images/favicon-16.png">
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
     <script src="./index.mjs" type="module"></script>
-    <script src="https://unpkg.com/focus-visible" async></script>
     <link rel="stylesheet" href="./index.css">
-    <link rel="stylesheet" href="./modules/button/button.css">
+    <style>
+      .invisible>* {
+        opacity: 0;
+      }
+
+      body::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 50px;
+        height: 50px;
+        background: white;
+        transform: translate(-50%, -50%);
+        animation: loader 1s ease infinite;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 100ms ease-in;
+      }
+
+      .invisible.spinner::after {
+        opacity: 1;
+        transition: opacity 100ms 300ms ease-in;
+      }
+
+      @keyframes loader {
+        0% {
+          transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+        }
+
+        50% {
+          transform: translate(-50%, -50%) scale(1) rotate(90deg);
+        }
+
+        100% {
+          transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+        }
+      }
+    </style>
   </head>
 
-  <body>
+  <body class="invisible">
+    <script> document.body.style.backgroundImage = `url(${window.BACKGROUND_IMAGE})` </script>
+    <script>
+      const el = document.createElement('div');
+      el.style.cssText = "width:100px;height:100px;overflow:scroll !important;position:absolute;top:-100vh"
+      document.body.prepend(el);
+      if (el.offsetWidth - el.clientWidth > 0) document.body.classList.add("has-scrollbar");
+      el.remove();
+    </script>
+    <div class="blur-bg-fallback"></div>
     <header>
-      <h1>Hi, <span contenteditable id="name">Name</span>!</h1>
-      <img src="./images/hello.png" alt="Smiley" class="hello-smiley">
+      <h1>Hi, <span contenteditable id="name">friend</span>!</h1>
+      <img src="./images/smiley.png" alt="Smiley" class="hello-smiley">
     </header>
 
     <main>
@@ -27,7 +92,7 @@
 
     <script>
       if (location.hostname !== 'localhost' && 'serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(error => {
+        navigator.serviceWorker.register('./serviceworker.js').catch(error => {
           console.error(error)
         })
       }
