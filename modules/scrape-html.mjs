@@ -1,11 +1,12 @@
-import cheerio from "./cheerio.mjs"
-import { fetchData, join, isAbsoluteURL } from "./utils.mjs"
+import cheerio from './cheerio.mjs'
+import { fetchData, join, isAbsoluteURL } from './utils.mjs'
 
-const getLargest = array => array.reduce((current, compare) => {
-  const currentSize = parseInt(current.sizes)
-  const compareSize = parseInt(compare.sizes)
-  return (!currentSize || compareSize > currentSize) ? compare : current
-})
+const getLargest = array =>
+  array.reduce((current, compare) => {
+    const currentSize = parseInt(current.sizes)
+    const compareSize = parseInt(compare.sizes)
+    return !currentSize || compareSize > currentSize ? compare : current
+  })
 
 const getTitle = ($, manifest = {}, url) => {
   const { name, short_name } = manifest
@@ -43,7 +44,7 @@ const getIcon = ($, manifest = {}, url) => {
   if (iconList.length) {
     const largest = getLargest(iconList)
     if (largest.sizes) return largest.src
-    return $('meta[property="og:image"]').attr("content") || largest.src
+    return $('meta[property="og:image"]').attr('content') || largest.src
   }
   return 'favicon.ico'
 }
@@ -53,7 +54,9 @@ const scrapeHTML = async url => {
   if (storedData) return storedData
 
   try {
+    console.log('try...')
     const html = await fetchData(url)
+    console.log(html)
     const $ = cheerio.load(html)
 
     let manifest
@@ -74,8 +77,9 @@ const scrapeHTML = async url => {
     localStorage.setItem(url, JSON.stringify(data))
 
     return data
-  } catch (_) {
-    return { name: url, icon: join(url, 'favicon.ico') }
+  } catch (error) {
+    console.error(error)
+    return { name: url.replace(/^(https?\:)?\/\//, ''), icon: join(url, 'favicon.ico') }
   }
 }
 

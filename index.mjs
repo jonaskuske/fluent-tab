@@ -16,24 +16,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     anchor.className = 'site'
     anchor.href = url
 
-    let button, loaded = false;
+    let button,
+      loaded = false
 
     const loadPlaceholderButton = wait(100).then(() => {
-      if (loaded) return;
-      button = new FluentButton(
-        anchor,
-        { text: url, icon: join(url, 'favicon.ico'), nodeType: 'div', outerReveal: true }
-      )
+      if (loaded) return
+      button = new FluentButton(anchor, {
+        text: url,
+        icon: join(url, 'favicon.ico'),
+        nodeType: 'div',
+        outerReveal: true,
+      })
     })
 
     const loadConfiguredButton = scrapeHTML(url).then(({ name, color, icon }) => {
-      loaded = true;
-      if (button) button.destroy();
+      loaded = true
+      console.log('Loaded!')
+      if (button) button.destroy()
 
-      button = new FluentButton(
-        anchor,
-        { text: name, icon, nodeType: 'div', outerReveal: true }
-      )
+      button = new FluentButton(anchor, { text: name, icon, nodeType: 'div', outerReveal: true })
 
       if (color) {
         setStyleProperty(anchor, '--color', color)

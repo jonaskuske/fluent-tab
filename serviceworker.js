@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fluent-tab-v5'
+const CACHE_NAME = 'fluent-tab-v6'
 
 const staticAssets = [
   '.',
@@ -20,7 +20,7 @@ self.addEventListener('install', event => {
     caches
       .open(CACHE_NAME)
       .then(cache => cache.addAll(staticAssets))
-      .then(() => self.skipWaiting()),
+      .then(() => self.skipWaiting())
   )
 })
 
@@ -35,7 +35,7 @@ self.addEventListener('activate', event => {
         }
       })
       return Promise.all(cacheDeletePromises)
-    }),
+    })
   )
 })
 
@@ -62,8 +62,7 @@ const isResponseCacheable = response => {
 const requestFailingWith404 = event => {
   return fetch(event.request).catch(() => {
     const body = JSON.stringify({
-      error:
-        "Sorry, you're offline. Try again once you have a working internet connection.",
+      error: "Sorry, you're offline. Try again once you have a working internet connection.",
     })
     const headers = { 'Content-Type': 'application/json' }
     return new Response(body, { status: 404, statusText: 'Not Found', headers })
@@ -104,8 +103,6 @@ self.addEventListener('fetch', event => {
           return response
         })
       })
-      .catch(() =>
-        caches.open(CACHE_NAME).then(cache => requestThenCache(event, cache)),
-      ),
+      .catch(() => caches.open(CACHE_NAME).then(cache => requestThenCache(event, cache)))
   )
 })
