@@ -4,11 +4,22 @@ export const wait = time => new Promise(resolve => setTimeout(resolve, time))
 export const isAbsoluteURL = path => /^(https?\:)?\/\//.test(path)
 
 const getCorsURL = url => `https://api.allorigins.ml/get?url=${encodeURIComponent(url)}`
+const getFallbackURL = url => `https://cors-anywhere.herokuapp.com/${url}`
+
+const validateResponse = response => {
+  if (response.ok) return response
+  throw response
+}
 
 export const fetchData = async url => {
-  return fetch(getCorsURL(url))
-    .then(response => response.json())
-    .then(body => body.contents)
+  try {
+    const response = await fetch(getCorsURL(url)).then(validateResponse)
+    const body = await response.json()
+    return body.contents
+  } catch (error) {
+    const response = await fetch(getFallbackURL(url)).then(validateResponse)
+    return response.text()
+  }
 }
 
 export const join = (base, path) => {

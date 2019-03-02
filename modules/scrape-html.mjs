@@ -54,9 +54,7 @@ const scrapeHTML = async url => {
   if (storedData) return storedData
 
   try {
-    console.log('try...')
     const html = await fetchData(url)
-    console.log(html)
     const $ = cheerio.load(html)
 
     let manifest
@@ -74,11 +72,13 @@ const scrapeHTML = async url => {
     const icon = join(url, iconPath)
 
     const data = { name, color, icon }
+
+    console.log(`Setting localStorage for ${name}...`)
     localStorage.setItem(url, JSON.stringify(data))
 
     return data
   } catch (error) {
-    console.error(error)
+    console.log(`Using fallback for ${url}...`)
     return { name: url.replace(/^(https?\:)?\/\//, ''), icon: join(url, 'favicon.ico') }
   }
 }
