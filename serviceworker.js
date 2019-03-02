@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fluent-tab-v6'
+const CACHE_NAME = 'fluent-tab-v7'
 
 const staticAssets = [
   '.',
