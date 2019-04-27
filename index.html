@@ -1,16 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Fluent Tab</title>
 
     <!-- Configuration: Change your prefered background image and the sites to display -->
     <script>
-      window.BACKGROUND_IMAGE = "./images/space-bg.jpg"
-      window.SITES = [
+      function logDebugMessage(...args) {
+        window.DEBUG && console.log(...args)
+      }
+      function logErrorMessage(msg, ...args) {
+        console.error('❌ ' + msg, ...args)
+      }
+      function readFile(file) {
+        return new Promise(res => {
+          const reader = new FileReader()
+          reader.addEventListener('load', f => res(f.target.result))
+          reader.readAsDataURL(file)
+        })
+      }
+
+      window.backgroundImage = {
+        _BACKGROUND_IMAGE: './images/background.jpg',
+        refresh() {
+          const storedImage = localStorage.getItem('BACKGROUND_IMAGE')
+          window.backgroundImage._BACKGROUND_IMAGE = storedImage || './images/background.jpg'
+          document.body.style.backgroundImage = `url(${window.backgroundImage._BACKGROUND_IMAGE})`
+        },
+        reset() {
+          localStorage.removeItem('BACKGROUND_IMAGE')
+          backgroundImage.refresh()
+          console.log('⏮ Image reset, using default from now on.')
+        },
+        choose() {
+          let inputEl = document.body.appendChild(
+            Object.assign(document.createElement('input'), {
+              type: 'file',
+              accept: 'image/*',
+              hidden: true,
+            })
+          )
+          inputEl.addEventListener('change', ({ target }) => {
+            const [image] = target.files
+            logDebugMessage(image)
+            logDebugMessage('⏳ Processing file...')
+
+            if (!/^image\//.test(image.type)) {
+              return logErrorMessage(
+                `Selected file is not an image! (invalid image.type: ${image.type})`
+              )
+            }
+            if (image.size > 2000000) {
+              return logErrorMessage(
+                `Image mustn't be larger than 2MB! (invalid image.size: ${image.size})`
+              )
+            }
+
+            readFile(image)
+              .then(bgImageUrl => {
+                localStorage.setItem('BACKGROUND_IMAGE', bgImageUrl)
+                backgroundImage.refresh()
+                console.log('💡 Background image updated.')
+              })
+              .catch(error => {
+                logErrorMessage('Updating background image failed!')
+                console.error(error)
+              })
+              .finally(() => {
+                inputEl.remove()
+                inputEl = null
+              })
+          })
+          inputEl.click()
+        },
+      }
+
+      const defaultSites = [
         'https://facebook.com',
         'https://github.com',
         'https://mobile.twitter.com',
@@ -18,25 +85,59 @@
         'https://theverge.com',
         'https://dev.to',
         'https://medium.com',
-        'https://thenounproject.com'
+        'https://thenounproject.com',
       ]
+      window.siteConfig = {
+        _SITES: [],
+        refresh(isInitial) {
+          const storedConfig = localStorage.getItem('SITES')
+          window.siteConfig._SITES = storedConfig ? JSON.parse(storedConfig) : defaultSites
+
+          if (window._refreshThumbnails) window._refreshThumbnails()
+          else !isInitial && console.log('⚠ You might need to refresh the page to see the changes.')
+        },
+        reset() {
+          localStorage.removeItem('SITES')
+          window.siteConfig.refresh()
+          console.log('⏮ siteConfig reset, using default sites from now on.')
+        },
+        removeSiteAtPosition(...positions) {
+          window.siteConfig._SITES = window.siteConfig._SITES.filter(
+            (_, i) => !positions.includes(i + 1)
+          )
+          localStorage.setItem('SITES', JSON.stringify(window.siteConfig._SITES))
+          window.siteConfig.refresh()
+
+          const suffix = positions.length > 1 ? 's' : ''
+          console.log(`🚮 Removed site${suffix} at position${suffix} ${positions.join(', ')}.`)
+        },
+        addSite(link) {
+          try {
+            const url = new URL(link)
+            window.siteConfig._SITES.push(url.href)
+            localStorage.setItem('SITES', JSON.stringify(window.siteConfig._SITES))
+            window.siteConfig.refresh()
+            console.log(`🆕 Added thumbnail for ${url.href}.`)
+          } catch (e) {
+            logErrorMessage('Site URL is invalid! Did you forget the protocol? (e.g. http://)')
+          }
+        },
+      }
     </script>
     <!-- End Configuration -->
 
-    <link rel="icon" type="image/png" sizes="32x32"
-      href="./images/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16"
-      href="./images/favicon-16.png">
-    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon-16.png" />
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon" />
     <script src="./index.mjs" type="module"></script>
-    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="./index.css" />
     <style>
-      .invisible>* {
+      .invisible > * {
         opacity: 0;
       }
 
       body::after {
-        content: "";
+        content: '';
         position: absolute;
         top: 50%;
         left: 50%;
@@ -72,18 +173,22 @@
   </head>
 
   <body class="invisible">
-    <script> document.body.style.backgroundImage = `url(${window.BACKGROUND_IMAGE})` </script>
     <script>
-      const el = document.createElement('div');
-      el.style.cssText = "width:100px;height:100px;overflow:scroll !important;position:absolute;top:-100vh"
-      document.body.prepend(el);
-      if (el.offsetWidth - el.clientWidth > 0) document.body.classList.add("has-scrollbar");
-      el.remove();
+      window.siteConfig.refresh(true)
+      window.backgroundImage.refresh()
+    </script>
+    <script>
+      const el = document.createElement('div')
+      el.style.cssText =
+        'width:100px;height:100px;overflow:scroll !important;position:absolute;top:-100vh'
+      document.body.prepend(el)
+      if (el.offsetWidth - el.clientWidth > 0) document.body.classList.add('has-scrollbar')
+      el.remove()
     </script>
     <div class="blur-bg-fallback"></div>
     <header>
       <h1>Hi, <span contenteditable id="name">friend</span>!</h1>
-      <img src="./images/smiley.png" alt="Smiley" class="hello-smiley">
+      <img src="./images/smiley.png" alt="Smiley" class="hello-smiley" />
     </header>
 
     <main>
@@ -98,5 +203,4 @@
       }
     </script>
   </body>
-
 </html>

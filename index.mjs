@@ -3,13 +3,13 @@ import FluentButton from './modules/fluent-button.mjs'
 import { $, wait, join, getBrightness, setStyleProperty } from './modules/utils.mjs'
 import './modules/edit-name.mjs'
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function insertThumbnails() {
   document.body.classList.add('spinner')
   const container = $('#sites')
 
   const loadPromises = []
 
-  for (const url of window.SITES) {
+  for (const url of window.siteConfig._SITES) {
     const anchor = document.createElement('a')
     container.append(anchor)
 
@@ -52,6 +52,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await Promise.all(loadPromises)
   document.body.classList.remove('invisible')
+  document.body.classList.remove('spinner')
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  insertThumbnails()
+  window._refreshThumbnails = () => {
+    $('#sites').innerHTML = ''
+    insertThumbnails()
+  }
 })
 
 try {
