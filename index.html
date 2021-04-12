@@ -197,7 +197,7 @@
 
     <script>
       if (location.hostname !== 'localhost' && 'serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./serviceworker.js').catch(error => {
+        navigator.serviceWorker.register('./serviceworker.js', { scope: '/fluent-tab/' }).catch(error => {
           console.error(error)
         })
       }
