@@ -3,7 +3,7 @@ export const $$ = document.querySelectorAll.bind(document)
 export const wait = time => new Promise(resolve => setTimeout(resolve, time))
 export const isAbsoluteURL = path => /^(https?\:)?\/\//.test(path)
 
-const getCorsURL = url => `https://api.allorigins.ml/get?url=${encodeURIComponent(url)}`
+const getCorsURL = url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
 const getFallbackURL = url => `https://cors-anywhere.herokuapp.com/${url}`
 
 const validateResponse = response => {
