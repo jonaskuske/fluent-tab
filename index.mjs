@@ -55,7 +55,20 @@ async function insertThumbnails() {
   document.body.classList.remove('spinner')
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+async function detectWindows11() {
+  const canCheck = navigator?.userAgentData?.platform === "Windows" && navigator?.userAgentData?.getHighEntropyValues
+
+  if (!localStorage.getItem('windows-11') && canCheck) {
+    const ua = await navigator.userAgentData.getHighEntropyValues(["platformVersion"])
+    const majorPlatformVersion = parseInt(ua.platformVersion.split('.')[0]);
+    localStorage.setItem('windows-11', majorPlatformVersion >= 13)
+  }
+
+  if (localStorage.getItem('windows-11') === 'true') document.body.classList.add('windows-11')
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  detectWindows11()
   insertThumbnails()
   window._refreshThumbnails = () => {
     $('#sites').innerHTML = ''

@@ -24,6 +24,10 @@ body {
   background: #000 center / cover no-repeat fixed;
 }
 
+.windows-11 .fluent-btn__btn {
+  border-radius: 6px;
+}
+
 .blur-bg-fallback {
   position: fixed;
   overflow: hidden;
