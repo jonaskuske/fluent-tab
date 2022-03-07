@@ -2,7 +2,14 @@
 
 A New Tab page designed following Microsoft's Fluent Design, with Reveal Effects and more.
 
-Meant as a replacement for the default "New Tab" experience in Microsoft Edge, for all the Windows 10/Fluent Design afiocionados out there 🎨
+![image](https://user-images.githubusercontent.com/30421456/157072440-8a84a472-1a02-41c1-aec7-174fe0e98dd0.png)
+
+
+
+Meant as a replacement for the default "New Tab" experience in Microsoft Edge, for all the Fluent Design afiocionados out there 🎨
+
+<br>
+<br>
 
 ## Configuration
 
