@@ -78,6 +78,7 @@ const scrapeHTML = async url => {
 
     return data
   } catch (error) {
+    console.error(error)
     console.log(`Using fallback for ${url}...`)
     return { name: url.replace(/^(https?\:)?\/\//, ''), icon: join(url, 'favicon.ico') }
   }
