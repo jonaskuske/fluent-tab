@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fluent-tab-v13'
+const CACHE_NAME = 'fluent-tab-v14'
 
 const staticAssets = [
   '.',
@@ -17,11 +17,11 @@ const staticAssets = [
 // get the filenames to cache from the parcel-manifest and add them to cache
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then(cache => cache.addAll(staticAssets))
-      .then(() => self.skipWaiting())
-  )
+		caches
+			.open(CACHE_NAME)
+			.then((cache) => cache.addAll(staticAssets.map((url) => `${url}?v=${CACHE_NAME}`)))
+			.then(() => self.skipWaiting()),
+	)
 })
 
 /* delete old caches on activation */
