@@ -15,7 +15,10 @@ export const fetchData = async url => {
   try {
     const response = await fetch(getCorsURL(url)).then(validateResponse)
     const body = await response.json()
-    return body.contents
+    if (body.contents?.match(/^data:.+;base64,/)) {
+			return atob(body.contents.replace(/^data:.+;base64,/, ""))
+		}
+			return body.contents
   } catch (error) {
     const response = await fetch(getFallbackURL(url)).then(validateResponse)
     return response.text()
